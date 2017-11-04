@@ -25,7 +25,8 @@ class TodoList extends Component {
 
 export default connect(
     state => ({todos: state.todos}),
-    dispatch => ({
+   /* dispatch => ({
      delTodo:(id)=>dispatch({type:DEL_TODO,id})
-   })
+   })*/
+    {delTodo:id=>({type:DEL_TODO,id})}
 )(TodoList)
