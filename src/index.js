@@ -1,3 +1,4 @@
+//实际渲染的就是App这个组件
 import React,{Component} from 'react'
 import {render} from 'react-dom';
 import App from './components/App'
