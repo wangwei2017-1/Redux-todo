@@ -12,9 +12,14 @@ export default function (state = [], action) {
                 if(item.id == action.id)
                     item.completed = !item.completed;
                 return item;
-            });
+            })
         case types.DELETE_ALL_COMPLETED:
             return state.filter(item=>!item.completed);
+        case types.TOGGLE_ALL:
+            return state.map(item=>{
+                item.completed = action.checked;
+                return item;
+            });
         default:
             return state;
     }
