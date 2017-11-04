@@ -2,6 +2,28 @@ import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import * as types from '../store/action-types';
 class TodoList extends Component {
+    constructor(){
+        super();
+        this.state = {title:''};
+    }
+    changeEditing = (id)=>{
+        let item = this.props.todos.find(item=>item.id == id);
+        this.title = item.title;
+        this.props.changeEditing(id);
+        this.setState({title:item.title});
+    }
+    handleChange = (event)=>{
+        this.setState({title:event.target.value});
+    }
+    handleKeyDown = (event,id)=>{
+        if(event.keyCode === 27){
+            this.props.changeEditing('');
+            this.setState({title:this.title});
+        }else if(event.keyCode === 13){
+            this.props.changeEditing('');
+            this.props.updateTodo(id,this.state.title);
+        }
+    }
     render() {
         return (
             <ul className="list-group">
@@ -20,7 +42,19 @@ class TodoList extends Component {
                             <input type="checkbox"
                                    onChange={()=>this.props.toggleTodo(item.id)}
                                    checked={item.completed}/>
-                            <span style={{marginLeft:5,textDecoration:item.completed?'line-through':''}}>{item.title}</span>
+                            {
+                                this.props.editing === item.id?
+                                    <input
+                                        onChange={this.handleChange}
+                                        onKeyDown={(event)=>this.handleKeyDown(event,item.id)}
+                                        style={{marginLeft:5,lineHeight:'24px',borderRadius:3,width:400}}
+                                        type="text"
+                                        value={this.state.title}/>
+                                    :<span
+                                        onDoubleClick={()=>this.changeEditing(item.id)}
+                                        style={{marginLeft:5,textDecoration:item.completed?'line-through':''}}>{item.title}</span>
+                            }
+
                             <span className="pull-right">
                  <button
                      className="btn btn-danger btn-xs"
@@ -36,7 +70,7 @@ class TodoList extends Component {
 
 export default connect(
     state => ({
-        todos: state.todos.filter(item=>{
+        todos: state.todos.list.filter(item=>{
             switch(state.filter){
                 case 'active':
                     return !item.completed;
@@ -45,7 +79,8 @@ export default connect(
                 default:
                     return true;
             }
-        }),activeCount:state.todos.filter(item=>!item.completed).length
+        }),activeCount:state.todos.list.filter(item=>!item.completed).length,
+        editing:state.todos.editing
     }),
     /*dispatch => ({
       delTodo:(id)=>dispatch({type:DEL_TODO,id})
@@ -54,6 +89,8 @@ export default connect(
     {
         delTodo:id=>({type:types.DEL_TODO,id}),
         toggleTodo:id=>({type:types.TOGGLE_TODO,id}),
-        toggleAll:checked=>({type:types.TOGGLE_ALL,checked})
+        toggleAll:checked=>({type:types.TOGGLE_ALL,checked}),
+        changeEditing:id=>({type:types.CHANGE_EDITING,id}),
+        updateTodo:(id,title)=>({type:types.UPDATE_TODO,id,title})
     }
 )(TodoList)
